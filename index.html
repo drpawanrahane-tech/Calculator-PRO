@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scientific Calculator 2026 PRO by Pawan Rahane</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bd:#e0e0e0;--bd2:#d0d0d0;--bd3:#c0c0c0;
+  --dsh:#1a1a1a;--lcd:#bcc895;--lct:#182008;--lce:#384820;--lcd2:#7a8860;
+  --kn:#1c1c1c;--kf:#252525;--ko:#1e1e1e;--km:#1e1f2e;
+  --ks:#e8a800;--ka:#c81414;--kac:#b81010;--keq:#0c2a7a;--kdel:#252525;
+  --tw:#f8f8f8;--tb:#ffffff;--ts:#f0b000;--tr:#d41414;
+}
+body{background:#b8b8b8;background-image:radial-gradient(ellipse 80% 50% at 50% 0%,#c8c8c8,transparent 80%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:14px 10px;font-family:'Exo 2',sans-serif;}
+
+/* ── CALCULATOR SHELL ── */
+.calc{
+  background:linear-gradient(175deg,var(--bd) 0%,var(--bd2) 60%,var(--bd3) 100%);
+  border-radius:12px 12px 20px 20px;padding:12px 12px 18px;width:360px;
+  position:relative;
+  box-shadow:0 0 0 1px #a0a0a0,0 2px 0 1.5px #b8b8b8,
+    0 30px 60px rgba(0,0,0,.5),0 8px 20px rgba(0,0,0,.3),
+    inset 0 1px 0 rgba(255,255,255,.8);
+}
+.screw{position:absolute;width:10px;height:10px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#b0b0b0,#606060);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.4);}
+.screw::before,.screw::after{content:'';position:absolute;top:50%;left:15%;right:15%;height:1.5px;
+  background:rgba(0,0,0,.4);border-radius:1px;}
+.screw::before{transform:translateY(-50%) rotate(45deg);}
+.screw::after{transform:translateY(-50%) rotate(-45deg);}
+.sc-tl{top:8px;left:8px;}.sc-tr{top:8px;right:8px;}
+.sc-bl{bottom:8px;left:8px;}.sc-br{bottom:8px;right:8px;}
+
+/* brand */
+.brand{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 3px;}
+.b-title{font-family:'Exo 2',sans-serif;font-weight:900;font-size:16px;letter-spacing:2px;color:#222;}
+.b-right{text-align:right;}
+.b-model{font-size:8px;color:#666;letter-spacing:2px;display:block;}
+
+/* solar strip */
+.solar{height:9px;border-radius:3px;margin-bottom:7px;display:flex;gap:1px;padding:1px;background:#1a1a1a;}
+.sc2{flex:1;border-radius:1px;background:linear-gradient(135deg,#1e2e18,#2a3e20 50%,#182416);}
+
+/* ── DISPLAY ── */
+.dsp-house{background:var(--dsh);border-radius:5px;padding:3px;margin-bottom:10px;
+  box-shadow:inset 0 3px 12px rgba(0,0,0,.9),inset 0 0 0 1px #080808;}
+.dsp{background:var(--lcd);background-image:linear-gradient(150deg,rgba(255,255,255,.15),transparent 50%);
+  border-radius:3px;padding:6px 10px 8px;min-height:76px;position:relative;overflow:hidden;transition:background .15s;}
+.dsp::after{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.016) 3px,rgba(0,0,0,.016) 4px);
+  pointer-events:none;}
+.dsp-flags{display:flex;gap:5px;margin-bottom:3px;flex-wrap:wrap;}
+.flag{font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--lcd2);opacity:.3;transition:opacity .1s,color .1s;letter-spacing:.3px;font-weight:700;}
+.flag.on{opacity:1;color:#2a3c10;}
+.flag.f-sft{opacity:1;color:#906000!important;}
+.flag.f-alp{opacity:1;color:#900808!important;}
+.dsp-expr{font-family:'Share Tech Mono',monospace;font-size:10.5px;color:var(--lce);min-height:13px;max-height:26px;overflow:hidden;word-break:break-all;line-height:1.4;margin-bottom:2px;}
+.dsp-res{font-family:'Share Tech Mono',monospace;font-size:30px;color:var(--lct);text-align:right;line-height:1;min-height:32px;display:flex;align-items:flex-end;justify-content:flex-end;font-weight:700;}
+.dsp-res.s2{font-size:22px;}.dsp-res.s3{font-size:16px;}.dsp-res.s4{font-size:12px;}
+.cursor{width:2px;height:22px;background:var(--lct);margin-left:1px;flex-shrink:0;animation:blink 1s step-end infinite;margin-bottom:1px;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes fOK{0%,100%{background:var(--lcd)}50%{background:#ccd8a4}}
+@keyframes fERR{0%,100%{background:var(--lcd)}40%,60%{background:#d8aaaa}}
+.dsp.ok{animation:fOK .22s ease;}.dsp.err{animation:fERR .4s ease 2;}
+
+/* ── BUTTONS ── */
+.btn-area{display:flex;flex-direction:column;gap:4px;}
+.brow{display:grid;gap:3.5px;}.r5{grid-template-columns:repeat(5,1fr);}
+button{border:none;cursor:pointer;border-radius:3px;height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 1px;position:relative;transition:filter .05s,transform .06s;outline:none;user-select:none;overflow:hidden;}
+button:hover{filter:brightness(1.3);}
+button:active{transform:scale(.92);filter:brightness(.7);}
+
+/* label tiers */
+.ls{position:absolute;top:2.5px;left:0;right:0;text-align:center;font-size:7px;font-family:'Exo 2',sans-serif;font-weight:800;color:var(--ts);line-height:1;pointer-events:none;}
+.la{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:6.5px;font-family:'Exo 2',sans-serif;font-weight:800;color:var(--tr);line-height:1;pointer-events:none;}
+.lm{font-family:'Exo 2',sans-serif;font-weight:700;font-size:12px;line-height:1;pointer-events:none;color:var(--tw);}
+
+/* SHIFT */
+.bk-shift{background:linear-gradient(160deg,#f0b000,#c88000);border-top:1px solid #ffc820;border-bottom:2.5px solid #805000;}
+.bk-shift .lm{color:#fff;font-weight:900;font-size:11px;}
+/* ALPHA */
+.bk-alpha{background:linear-gradient(160deg,#d01818,#980c0c);border-top:1px solid #e82828;border-bottom:2.5px solid #600808;}
+.bk-alpha .lm{color:#fff;font-weight:900;font-size:11px;}
+/* MODE / system */
+.bk-mode{background:linear-gradient(160deg,#2c2e40,#1e2030);border-top:1px solid #3e4060;border-bottom:2.5px solid #0c0e1a;}
+.bk-mode .lm{color:#b0b8e0;font-size:11px;}
+.bk-mode .ls{color:#e8c860;}
+/* AC */
+.bk-ac{background:linear-gradient(160deg,#c01414,#880c0c);border-top:1px solid #d82020;border-bottom:2.5px solid #500808;}
+.bk-ac .lm{color:#fff;font-size:13px;font-weight:900;}
+.bk-ac .ls{color:#ffaaaa;}
+/* DEL */
+.bk-del{background:linear-gradient(160deg,#2a2a2a,#1a1a1a);border-top:1px solid #3a3a3a;border-bottom:2.5px solid #080808;}
+.bk-del .lm{color:#ff9898;font-size:13px;}
+.bk-del .ls{color:#ffbbbb;}
+/* FN - dark gray */
+.bk-fn{background:linear-gradient(160deg,#2e2e2e,#1e1e1e);border-top:1px solid #3c3c3c;border-bottom:2.5px solid #0a0a0a;}
+.bk-fn .lm{color:var(--tw);}
+/* NUM */
+.bk-num{background:linear-gradient(160deg,#282828,#181818);border-top:1px solid #383838;border-bottom:2.5px solid #060606;}
+.bk-num .lm{color:var(--tb);font-size:18px;font-weight:600;}
+/* OP */
+.bk-op{background:linear-gradient(160deg,#222222,#121212);border-top:1px solid #303030;border-bottom:2.5px solid #040404;}
+.bk-op .lm{color:#a0d8f8;font-size:19px;}
+/* EQ */
+.bk-eq{background:linear-gradient(155deg,#1040a0,#082870);border-top:1px solid #1858c0;border-bottom:2.5px solid #041030;
+  box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 12px rgba(60,120,255,.15);}
+.bk-eq .lm{color:#d0e8ff;font-size:20px;font-weight:900;}
+
+button.sft-on{box-shadow:0 0 10px rgba(240,180,0,.6),inset 0 0 8px rgba(240,180,0,.15)!important;}
+button.alp-on{box-shadow:0 0 10px rgba(210,40,40,.6),inset 0 0 8px rgba(210,40,40,.15)!important;}
+
+.sep{height:1px;background:linear-gradient(90deg,transparent,#a8a8a8,transparent);margin:1px 0;}
+@keyframes rpl{to{transform:scale(6);opacity:0;}}
+.rpleff{position:absolute;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:rpl .35s ease-out forwards;pointer-events:none;left:50%;top:50%;margin:-4px 0 0 -4px;}
+.hint{position:absolute;top:5px;right:10px;font-family:'Share Tech Mono',monospace;font-size:8.5px;color:#e89830;opacity:0;transition:opacity .2s;pointer-events:none;z-index:10;background:rgba(0,0,0,.7);padding:2px 6px;border-radius:3px;}
+.hint.show{opacity:1;}
+
+/* ══ MODE OVERLAY ══ */
+.mode-overlay{width:360px;margin-top:8px;background:#1a1c22;border-radius:10px;border:1px solid #2e3040;display:none;overflow:hidden;}
+.mode-overlay.show{display:block;}
+.mo-head{background:#12141a;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2e3040;}
+.mo-title{font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;color:#7090b0;letter-spacing:2px;}
+.mo-exit{background:none;border:1px solid #3a3040;border-radius:3px;color:#a070a0;font-size:9px;font-family:'Exo 2',sans-serif;font-weight:700;padding:2px 8px;cursor:pointer;height:auto;}
+.mo-exit:hover{background:#2a1c2a;color:#d090d0;}
+.mo-body{padding:12px;}
+
+/* overlay inputs */
+.mo-section{margin-bottom:10px;}
+.mo-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6080a0;margin-bottom:4px;letter-spacing:1px;}
+.mo-row{display:flex;gap:6px;align-items:center;margin-bottom:5px;}
+.mo-coef{font-family:'Share Tech Mono',monospace;font-size:9px;color:#8090a0;min-width:16px;}
+.mo-inp{background:#0e1018;border:1px solid #2e3040;border-radius:3px;color:#c8d4e0;font-family:'Share Tech Mono',monospace;font-size:12px;padding:4px 7px;width:100%;outline:none;text-align:center;}
+.mo-inp:focus{border-color:#5080b0;background:#12161e;}
+.mo-btn{background:#1a3a6e;border:1px solid #2458b0;border-radius:4px;color:#9ac8ff;font-family:'Exo 2',sans-serif;font-size:11px;font-weight:700;padding:6px 14px;cursor:pointer;height:auto;}
+.mo-btn:hover{background:#1e4a8a;filter:brightness(1.15);}
+.mo-btn.green{background:#1a3a1a;border-color:#2a5a2a;color:#88d088;}
+.mo-btn.red{background:#3a1a1a;border-color:#5a2a2a;color:#d08888;}
+.mo-result{background:#0e1018;border:1px solid #2a3040;border-radius:4px;padding:8px 10px;margin-top:8px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#c8e4a0;line-height:1.7;}
+.mo-result.err{color:#e09090;border-color:#4a2020;}
+.mo-tabs{display:flex;gap:4px;margin-bottom:10px;}
+.mo-tab{background:#1a1c22;border:1px solid #2e3040;border-radius:4px 4px 0 0;color:#6080a0;font-size:10px;font-family:'Exo 2',sans-serif;font-weight:700;padding:4px 10px;cursor:pointer;height:auto;}
+.mo-tab.active{background:#0e1018;border-color:#5080b0;color:#90b8e0;}
+.stat-table{width:100%;border-collapse:collapse;margin-bottom:8px;}
+.stat-table th,.stat-table td{border:1px solid #2a2e3a;padding:4px 6px;font-family:'Share Tech Mono',monospace;font-size:11px;text-align:center;color:#c0ccd8;}
+.stat-table th{background:#1a1c28;color:#7090b0;font-size:9px;letter-spacing:1px;}
+.stat-table input{background:transparent;border:none;color:#c8d8e0;font-family:'Share Tech Mono',monospace;font-size:11px;width:70px;text-align:center;outline:none;}
+.mat-grid{display:grid;gap:3px;margin-bottom:6px;}
+.mat-inp{background:#0e1018;border:1px solid #2e3040;border-radius:2px;color:#c8d4e0;font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px;text-align:center;outline:none;width:100%;}
+.mat-inp:focus{border-color:#5080b0;}
+.base-display{background:#0e1018;border:1px solid #2a3040;border-radius:4px;padding:8px 10px;margin-bottom:8px;}
+.base-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.base-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6080a0;min-width:36px;}
+.base-val{font-family:'Share Tech Mono',monospace;font-size:13px;color:#c8e4a0;text-align:right;flex:1;}
+.base-val.active{color:#ffd080;}
+.vec-inp{background:#0e1018;border:1px solid #2e3040;border-radius:3px;color:#c8d4e0;font-family:'Share Tech Mono',monospace;font-size:12px;padding:4px 6px;width:70px;text-align:center;outline:none;}
+.tbl-output{max-height:150px;overflow-y:auto;margin-top:6px;}
+.tbl-output table{width:100%;border-collapse:collapse;}
+.tbl-output th,.tbl-output td{border:1px solid #2a2e3a;padding:3px 8px;font-family:'Share Tech Mono',monospace;font-size:10px;text-align:right;color:#c0ccd8;}
+.tbl-output th{background:#1a1c28;color:#7090b0;font-size:8px;letter-spacing:1px;}
+.tbl-output::-webkit-scrollbar{width:3px;}
+.tbl-output::-webkit-scrollbar-thumb{background:#2a2e3a;border-radius:2px;}
+.cmplx-row{display:flex;align-items:center;gap:4px;margin-bottom:5px;}
+.cmplx-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8090a0;min-width:20px;}
+.cmplx-pm{font-family:'Share Tech Mono',monospace;font-size:14px;color:#a0a8b0;}
+.ineq-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.ineq-sel{background:#0e1018;border:1px solid #2e3040;border-radius:3px;color:#c8d4e0;font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px;outline:none;}
+.ineq-sel:focus{border-color:#5080b0;}
+.mo-sub{margin-bottom:10px;}
+.mo-sub-title{font-family:'Share Tech Mono',monospace;font-size:9px;color:#5070a0;margin-bottom:6px;border-bottom:1px solid #1e2030;padding-bottom:4px;}
+
+/* GAS bar */
+.gas-bar{width:360px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;font-family:'Share Tech Mono',monospace;font-size:8px;color:#606878;}
+.gas-btn{background:none;border:1px solid #484c58;border-radius:3px;color:#606878;font-size:8px;font-family:'Exo 2',sans-serif;font-weight:700;padding:2px 8px;cursor:pointer;height:auto;}
+.gas-btn:hover{background:#1a1c22;color:#9090b0;}
+.gas-panel{width:360px;margin-top:6px;background:#12141a;border-radius:8px;border:1px solid #2a2c38;display:none;overflow:hidden;}
+.gas-ph{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#0e1018;border-bottom:1px solid #2a2c38;}
+.gas-pt{font-family:'Share Tech Mono',monospace;font-size:8.5px;font-weight:700;color:#6080a0;letter-spacing:1.5px;}
+.gas-ab{border:1px solid;border-radius:3px;font-size:8px;font-family:'Exo 2',sans-serif;font-weight:700;padding:2px 7px;cursor:pointer;height:auto;}
+.gas-list{max-height:130px;overflow-y:auto;}
+.gas-list::-webkit-scrollbar{width:3px;}
+.gas-list::-webkit-scrollbar-thumb{background:#2a2c38;border-radius:2px;}
+.gas-row{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-bottom:1px solid #1a1c22;cursor:pointer;transition:background .1s;}
+.gas-row:hover{background:#1a1c22;}
+.gas-expr{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a5838;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gas-result{font-family:'Share Tech Mono',monospace;font-size:10px;color:#c8d4ac;font-weight:700;margin:0 8px;}
+.gas-time{font-family:'Share Tech Mono',monospace;font-size:7.5px;color:#2e3840;}
+.footer{text-align:center;margin-top:10px;font-size:8px;color:#707070;letter-spacing:1.5px;}
+</style>
+</head>
+<body>
+
+<div class="calc" id="calc">
+  <div class="screw sc-tl"></div><div class="screw sc-tr"></div>
+  <div class="screw sc-bl"></div><div class="screw sc-br"></div>
+
+  <div class="brand">
+    <div>
+      <div class="b-title">SCIENTIFIC</div>
+      <div style="font-size:7.5px;color:#888;letter-spacing:1.5px;margin-top:1px;">CALCULATOR 2026 PRO</div>
+    </div>
+    <div class="b-right">
+      <span class="b-model">NATURAL DISPLAY</span>
+      <span style="font-size:7px;color:#999;letter-spacing:1px;display:block;margin-top:2px;font-weight:600;">by Pawan Rahane</span>
+    </div>
+  </div>
+
+  <div class="solar" id="solar"></div>
+
+  <div class="dsp-house">
+    <div class="dsp" id="dsp">
+      <div class="dsp-flags">
+        <span class="flag" id="fSHIFT">SHIFT</span>
+        <span class="flag" id="fALPHA">ALPHA</span>
+        <span class="flag on" id="fMODE">COMP</span>
+        <span class="flag on" id="fANG">DEG</span>
+        <span class="flag" id="fM">M</span>
+        <span class="flag" id="fENG">ENG</span>
+        <span class="flag" id="fSTO">STO▸</span>
+        <span class="flag" id="fRCL">RCL▸</span>
+        <span class="flag" id="fANS">Ans</span>
+      </div>
+      <div class="dsp-expr" id="dsp-expr"></div>
+      <div class="dsp-res" id="dsp-res">0<span class="cursor" id="cur"></span></div>
+    </div>
+  </div>
+
+  <div class="btn-area">
+    <!-- Row 0 -->
+    <div class="brow r5">
+      <button class="bk-shift" id="bsh" onclick="doShift(event)"><span class="lm">SHIFT</span></button>
+      <button class="bk-alpha" id="bal" onclick="doAlpha(event)"><span class="lm">ALPHA</span></button>
+      <button class="bk-mode" onclick="btn(event,'mode')"><span class="ls">COMP</span><span class="lm">MODE</span></button>
+      <button class="bk-mode" onclick="btn(event,'drg')"><span class="ls">SETUP</span><span class="lm">DRG▸</span></button>
+      <button class="bk-ac" onclick="btn(event,'ac','off')"><span class="ls">OFF</span><span class="lm">AC</span></button>
+    </div>
+    <!-- Row 1 -->
+    <div class="brow r5">
+      <button class="bk-fn" onclick="btn(event,'recip','fact')"><span class="ls">x!</span><span class="lm">x⁻¹</span></button>
+      <button class="bk-fn" onclick="btn(event,'log','pow10')"><span class="ls">10ˣ</span><span class="lm">log</span></button>
+      <button class="bk-fn" onclick="btn(event,'ln','expe')"><span class="ls">eˣ</span><span class="lm">ln</span></button>
+      <button class="bk-fn" onclick="btn(event,'sq','cube')"><span class="ls">x³</span><span class="lm">x²</span></button>
+      <button class="bk-fn" onclick="btn(event,'pow','yroot')"><span class="ls">ʸ√x</span><span class="lm">xʸ</span></button>
+    </div>
+    <!-- Row 2 -->
+    <div class="brow r5">
+      <button class="bk-fn" onclick="btn(event,'sqrt','cbrt')"><span class="ls">∛</span><span class="lm">√</span></button>
+      <button class="bk-fn" onclick="btn(event,'absfn','intfn')"><span class="ls">Int</span><span class="lm">|x|</span></button>
+      <button class="bk-fn" onclick="btn(event,'ncr','npr')"><span class="ls">ⁿPᵣ</span><span class="lm" style="font-size:11px;">ⁿCᵣ</span></button>
+      <button class="bk-fn" onclick="btn(event,'pct','gcdfn')"><span class="ls">GCD</span><span class="lm">%</span></button>
+      <button class="bk-mode" onclick="btn(event,'eng','lcmfn')"><span class="ls">LCM</span><span class="lm">ENG</span></button>
+    </div>
+    <!-- Row 3 -->
+    <div class="brow r5">
+      <button class="bk-fn" onclick="btn(event,'sin','asin')"><span class="ls">sin⁻¹</span><span class="lm">sin</span></button>
+      <button class="bk-fn" onclick="btn(event,'cos','acos')"><span class="ls">cos⁻¹</span><span class="lm">cos</span></button>
+      <button class="bk-fn" onclick="btn(event,'tan','atan')"><span class="ls">tan⁻¹</span><span class="lm">tan</span></button>
+      <button class="bk-fn" onclick="btn(event,'oparen')"><span class="lm" style="font-size:18px;">(</span></button>
+      <button class="bk-fn" onclick="btn(event,'cparen')"><span class="lm" style="font-size:18px;">)</span></button>
+    </div>
+    <!-- Row 4 -->
+    <div class="brow r5">
+      <button class="bk-fn" onclick="btn(event,'sinh','asinh')"><span class="ls">sinh⁻¹</span><span class="lm" style="font-size:10.5px;">sinh</span></button>
+      <button class="bk-fn" onclick="btn(event,'cosh','acosh')"><span class="ls">cosh⁻¹</span><span class="lm" style="font-size:10.5px;">cosh</span></button>
+      <button class="bk-fn" onclick="btn(event,'tanh','atanh')"><span class="ls">tanh⁻¹</span><span class="lm" style="font-size:10.5px;">tanh</span></button>
+      <button class="bk-fn" onclick="btn(event,'pi','euler')"><span class="ls">e</span><span class="lm" style="font-size:16px;">π</span></button>
+      <button class="bk-fn" onclick="btn(event,'ran','ranint')"><span class="ls">RanInt</span><span class="lm" style="font-size:10px;">Ran#</span></button>
+    </div>
+    <!-- Row 5 -->
+    <div class="brow r5">
+      <button class="bk-fn" onclick="btn(event,'mplus','mminus')"><span class="ls">M−</span><span class="lm" style="font-size:11px;">M+</span></button>
+      <button class="bk-fn" onclick="btn(event,'rcl','mc')"><span class="ls">MC</span><span class="lm" style="font-size:11px;">RCL</span></button>
+      <button class="bk-fn" onclick="btn(event,'sto')"><span class="la">0=M 1=A…6=F</span><span class="lm" style="font-size:11px;">STO</span></button>
+      <button class="bk-fn" onclick="btn(event,'logbase','modfn')"><span class="ls">mod</span><span class="lm" style="font-size:9px;">log(a,b)</span></button>
+      <button class="bk-del" onclick="btn(event,'del','clr')"><span class="ls">CLR</span><span class="lm">⌫</span></button>
+    </div>
+    <div class="sep"></div>
+    <!-- Row 6 -->
+    <div class="brow r5">
+      <button class="bk-num" onclick="btn(event,'n7')"><span class="lm">7</span></button>
+      <button class="bk-num" onclick="btn(event,'n8')"><span class="lm">8</span></button>
+      <button class="bk-num" onclick="btn(event,'n9')"><span class="lm">9</span></button>
+      <button class="bk-del" onclick="btn(event,'del')"><span class="lm">⌫</span></button>
+      <button class="bk-op" onclick="btn(event,'div')"><span class="lm">÷</span></button>
+    </div>
+    <!-- Row 7 -->
+    <div class="brow r5">
+      <button class="bk-num" onclick="btn(event,'n4')"><span class="lm">4</span></button>
+      <button class="bk-num" onclick="btn(event,'n5')"><span class="lm">5</span></button>
+      <button class="bk-num" onclick="btn(event,'n6')"><span class="lm">6</span></button>
+      <button class="bk-fn" onclick="btn(event,'fracfn','rndfn')"><span class="ls">Rnd</span><span class="lm" style="font-size:11px;">Frac</span></button>
+      <button class="bk-op" onclick="btn(event,'mul')"><span class="lm">×</span></button>
+    </div>
+    <!-- Row 8 -->
+    <div class="brow r5">
+      <button class="bk-num" onclick="btn(event,'n1')"><span class="lm">1</span></button>
+      <button class="bk-num" onclick="btn(event,'n2')"><span class="lm">2</span></button>
+      <button class="bk-num" onclick="btn(event,'n3')"><span class="lm">3</span></button>
+      <button class="bk-fn" onclick="btn(event,'floorfn','ceilfn')"><span class="ls">⌈x⌉</span><span class="lm" style="font-size:11px;">⌊x⌋</span></button>
+      <button class="bk-op" onclick="btn(event,'sub')"><span class="lm">−</span></button>
+    </div>
+    <!-- Row 9 -->
+    <div class="brow r5">
+      <button class="bk-fn" onclick="btn(event,'neg')"><span class="lm" style="font-size:12px;">(−)</span></button>
+      <button class="bk-num" onclick="btn(event,'n0')"><span class="lm">0</span></button>
+      <button class="bk-fn" onclick="btn(event,'dot')"><span class="lm" style="font-size:20px;">.</span></button>
+      <button class="bk-fn" onclick="btn(event,'exp10')"><span class="lm" style="font-size:9px;">×10ˣ</span></button>
+      <button class="bk-op" onclick="btn(event,'add')"><span class="lm">+</span></button>
+    </div>
+    <!-- Row 10 -->
+    <div class="brow" style="grid-template-columns:1fr 1fr 1fr 1fr 2fr;gap:3.5px;">
+      <button class="bk-fn" onclick="btn(event,'ans','pctkey')"><span class="ls">%</span><span class="lm" style="font-size:11.5px;">Ans</span></button>
+      <button class="bk-fn" onclick="btn(event,'dms','hmsfn')"><span class="ls">H.MS</span><span class="lm" style="font-size:10px;">°'"</span></button>
+      <button class="bk-fn" onclick="btn(event,'nthrtfn')"><span class="lm" style="font-size:11px;">ⁿ√(</span></button>
+      <button class="bk-fn" onclick="btn(event,'polfn','recfn')"><span class="ls">Rec(</span><span class="lm" style="font-size:10.5px;">Pol(</span></button>
+      <button class="bk-eq" onclick="btn(event,'eq')"><span class="lm">=</span></button>
+    </div>
+  </div>
+  <span class="hint" id="hint"></span>
+</div>
+
+<!-- ══ MODE OVERLAY ══ -->
+<div class="mode-overlay" id="mode-overlay">
+  <div class="mo-head">
+    <span class="mo-title" id="mo-title">MODE</span>
+    <button class="mo-exit" onclick="exitMode()">EXIT (AC)</button>
+  </div>
+  <div class="mo-body" id="mo-body"></div>
+</div>
+
+<!-- GAS bar -->
+<div class="gas-bar">
+  <span id="gas-user">—</span>
+  <button class="gas-btn" onclick="toggleGasPanel(event)">HISTORY ▾</button>
+  <span>v<?= appVersion ?> · <?= buildDate ?></span>
+</div>
+<div class="gas-panel" id="gas-panel">
+  <div class="gas-ph">
+    <span class="gas-pt">CALCULATION HISTORY</span>
+    <div style="display:flex;gap:4px;">
+      <button class="gas-ab" style="background:#1a3a6e;border-color:#2458b0;color:#9ac8ff;" onclick="refreshHistory()">REFRESH</button>
+      <button class="gas-ab" style="background:#1e3a1e;border-color:#2a5a2a;color:#88d088;" onclick="doExportCSV()">EXPORT</button>
+      <button class="gas-ab" style="background:#3a1a1a;border-color:#5a2828;color:#d08888;" onclick="doClearHistory()">CLEAR</button>
+    </div>
+  </div>
+  <div class="gas-list" id="gas-list"><div style="padding:12px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;color:#3a4455;">No history yet</div></div>
+</div>
+<div class="footer">SCIENTIFIC CALCULATOR 2026 PRO &nbsp;·&nbsp; by Pawan Rahane</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  TOKEN-BASED CALC ENGINE
+// ═══════════════════════════════════════════════════
+const ST={tok:[],result:'0',ans:0,mem:{M:0,A:0,B:0,C:0,D:0,E:0,F:0},ang:'DEG',openP:0,done:false,eng:false,shift:false,alpha:false,stoWait:false,rclWait:false,off:false,modeMenu:false,currentMode:'COMP'};
+const gE=()=>ST.tok.map(t=>t.e).join('');
+const gD=()=>ST.tok.map(t=>t.d).join('');
+const mk=(e,d,t,p=0)=>({e,d,t,p});
+const toR=x=>ST.ang==='DEG'?x*Math.PI/180:ST.ang==='GRAD'?x*Math.PI/200:x;
+const frR=x=>ST.ang==='DEG'?x*180/Math.PI:ST.ang==='GRAD'?x*200/Math.PI:x;
+const lastTok=()=>ST.tok[ST.tok.length-1];
+function mFact(n){n=Math.round(n);if(!isFinite(n)||n<0||n>170)return NaN;if(n<=1)return 1;let r=1;for(let i=2;i<=n;i++)r*=i;return r;}
+function mNCr(n,r){n=Math.round(n);r=Math.round(r);if(n<0||r<0||r>n)return NaN;if(r===0||r===n)return 1;if(r>n-r)r=n-r;let res=1;for(let i=0;i<r;i++)res=res*(n-i)/(i+1);return Math.round(res);}
+function mNPr(n,r){n=Math.round(n);r=Math.round(r);if(n<0||r<0||r>n)return NaN;let res=1;for(let i=0;i<r;i++)res*=(n-i);return res;}
+function mGCD(a,b){a=Math.abs(Math.round(a));b=Math.abs(Math.round(b));while(b){let t=b;b=a%b;a=t;}return a;}
+function mLCM(a,b){return Math.abs(a*b)/mGCD(a,b);}
+function mLogB(x,b){if(x<=0||b<=0||b===1)return NaN;return Math.log(x)/Math.log(b);}
+function mNthrt(n,x){if(x===0)return 0;if(x<0&&n%2===0)return NaN;return x<0?-Math.pow(-x,1/n):Math.pow(x,1/n);}
+function mMod(a,b){b=Math.abs(b);return((a%b)+b)%b;}
+function buildCtx(){return{SIN:x=>Math.sin(toR(x)),COS:x=>Math.cos(toR(x)),TAN:x=>{const r=toR(x),c=Math.cos(r);if(Math.abs(c)<1e-12)return NaN;return Math.sin(r)/c;},ASIN:x=>{if(x<-1||x>1)return NaN;return frR(Math.asin(x));},ACOS:x=>{if(x<-1||x>1)return NaN;return frR(Math.acos(x));},ATAN:x=>frR(Math.atan(x)),SINH:Math.sinh,COSH:Math.cosh,TANH:Math.tanh,ASINH:Math.asinh,ACOSH:x=>{if(x<1)return NaN;return Math.acosh(x);},ATANH:x=>{if(x<=-1||x>=1)return NaN;return Math.atanh(x);},LOG:x=>{if(x<=0)return NaN;return Math.log10(x);},LN:x=>{if(x<=0)return NaN;return Math.log(x);},LOGB:mLogB,EXP:Math.exp,POW10:x=>Math.pow(10,x),SQRT:x=>{if(x<0)return NaN;return Math.sqrt(x);},CBRT:Math.cbrt,NTHRT:mNthrt,ABS:Math.abs,INT:Math.trunc,FRAC:x=>x-Math.trunc(x),FLOOR:Math.floor,CEIL:Math.ceil,RND:Math.round,FACT:mFact,NCR:mNCr,NPR:mNPr,GCD:mGCD,LCM:mLCM,MOD:mMod,PI:Math.PI,EU:Math.E,ANS:ST.ans,mM:ST.mem.M,mA:ST.mem.A,mB:ST.mem.B,mC:ST.mem.C,mD:ST.mem.D,mE:ST.mem.E,mF:ST.mem.F};}
+function safeEval(expr){if(!expr)return NaN;const cx=buildCtx();try{const fn=new Function(...Object.keys(cx),'"use strict";return ('+expr+');');return fn(...Object.values(cx));}catch(e){return NaN;}}
+function fmt(n,dp=10){if(isNaN(n)||!isFinite(n))return 'Math Error';if(ST.eng)return fmtEng(n);const a=Math.abs(n);if(a!==0&&(a>=1e10||a<1e-9)){let s=n.toExponential(9);return s.replace(/(\.\d*?)0+(e)/,'$1$2').replace(/\.(e)/,'$1');}if(Number.isInteger(n)&&a<1e15)return String(n);return parseFloat(n.toPrecision(dp)).toString();}
+function fmtEng(n){if(n===0)return '0';const sgn=n<0?-1:1,a=Math.abs(n);const e3=Math.floor(Math.log10(a)/3)*3;const m=parseFloat((a/Math.pow(10,e3)).toPrecision(9));return(sgn<0?'-':'')+m+'×10^'+e3;}
+function fmtC(re,im){const r=fmt(re),sign=im<0?'−':'+',i=fmt(Math.abs(im));return r+' '+sign+' '+i+'i';}
+function lastAtom(){const n=ST.tok.length;if(n===0)return[0];let i=n-1;const lt=ST.tok[i];if(lt.t==='k'&&lt.e===')'){let d=0;while(i>=0){if(ST.tok[i].e===')')d++;else if(ST.tok[i].t==='f'){d--;if(d===0)break;}i--;}return[i];}while(i>0&&(ST.tok[i-1].t==='n'||ST.tok[i-1].t==='k'))i--;return[i];}
+function afterDone(){if(ST.done){ST.tok=[];ST.openP=0;ST.done=false;}}
+function implMul(){const lt=lastTok();if(lt&&(lt.t==='n'||lt.t==='k'))ST.tok.push(mk('*','×','o'));}
+function pushNum(ch){afterDone();const lt=lastTok();if(lt&&lt.t==='n'){lt.e+=ch;lt.d+=ch;}else{implMul();ST.tok.push(mk(ch,ch,'n'));}render();}
+function pushDot(){afterDone();const lt=lastTok();if(lt&&lt.t==='n'){if(!lt.e.includes('.')){lt.e+='.';lt.d+='.';}}else{implMul();ST.tok.push(mk('0.','0.','n'));}render();}
+function pushOp(e,d){if(ST.done){ST.tok=[mk('ANS','Ans','k')];ST.done=false;}const lt=lastTok();if(lt&&lt.t==='o')ST.tok.pop();ST.tok.push(mk(e,d,'o'));render();}
+function pushFn(e,d){afterDone();implMul();ST.tok.push(mk(e,d,'f',1));ST.openP++;render();}
+function pushConst(e,d){afterDone();implMul();ST.tok.push(mk(e,d,'k'));render();}
+function pushOpen(){afterDone();implMul();ST.tok.push(mk('(','(','f',1));ST.openP++;render();}
+function pushClose(){if(ST.openP>0){ST.tok.push(mk(')',')','k',-1));ST.openP--;render();}}
+function pushPostfix(e,d){if(ST.tok.length===0&&!ST.done)return;if(ST.done){ST.tok=[mk('ANS','Ans','k')];ST.done=false;}ST.tok.push(mk(e,d,'k'));render();}
+function pushFact(){if(ST.tok.length===0&&!ST.done)return;if(ST.done){ST.tok=[mk('ANS','Ans','k')];ST.done=false;}const[b]=lastAtom();const ea=ST.tok.slice(b).map(t=>t.e).join(''),da=ST.tok.slice(b).map(t=>t.d).join('');ST.tok.splice(b,ST.tok.length-b,mk('FACT('+ea+')',da+'!','k'));render();}
+function pushYroot(){if(ST.tok.length===0&&!ST.done)return;if(ST.done){ST.tok=[mk('ANS','Ans','k')];ST.done=false;}const[b]=lastAtom();const ea=ST.tok.slice(b).map(t=>t.e).join(''),da=ST.tok.slice(b).map(t=>t.d).join('');ST.tok.splice(b,ST.tok.length-b,mk('NTHRT('+ea+',',da+'ʸ√(','f',1));ST.openP++;render();}
+function pushNeg(){if(ST.done){const n=-ST.ans;ST.ans=n;ST.result=fmt(n);ST.tok=[mk(String(n),String(n),'k')];ST.done=false;render();return;}const lt=lastTok();if(!lt||lt.t==='o'||lt.t==='f'){ST.tok.push(mk('-','−','o'));render();return;}const[b]=lastAtom();const ea=ST.tok.slice(b).map(t=>t.e).join(''),da=ST.tok.slice(b).map(t=>t.d).join('');ST.tok.splice(b,ST.tok.length-b,mk('(-'+ea+')','(−'+da+')','k'));render();}
+function calculate(){if(ST.tok.length===0)return;let ev=gE();for(let i=0;i<ST.openP;i++)ev+=')';const cx=buildCtx();try{const fn=new Function(...Object.keys(cx),'"use strict";return ('+ev+');');const r=fn(...Object.values(cx));if(typeof r!=='number'||isNaN(r)||!isFinite(r))throw new Error();ST.ans=r;ST.result=fmt(r);let dp=gD();for(let i=0;i<ST.openP;i++)dp+=')';ST.tok=[mk(String(r),dp,'k')];ST.openP=0;ST.done=true;flashOK();gasLog();}catch(ex){ST.result='Math Error';ST.tok=[];ST.openP=0;ST.done=false;flashErr();}render();}
+function doDelete(){if(ST.done){acIn();return;}if(ST.tok.length===0)return;const lt=lastTok();if(lt.t==='n'&&lt.e.length>1){lt.e=lt.e.slice(0,-1);lt.d=lt.d.slice(0,-1);}else{if(lt.p!==0)ST.openP=Math.max(0,ST.openP-lt.p);ST.tok.pop();}render();}
+function acIn(){ST.tok=[];ST.result='0';ST.openP=0;ST.done=false;render();}
+function render(){if(ST.modeMenu)return;const resEl=document.getElementById('dsp-res'),exprEl=document.getElementById('dsp-expr'),cur=document.getElementById('cur');const val=ST.done?ST.result:(gD()||'0');resEl.className='dsp-res';const L=val.length;if(L>18)resEl.classList.add('s4');else if(L>14)resEl.classList.add('s3');else if(L>10)resEl.classList.add('s2');resEl.textContent=val;resEl.appendChild(cur);exprEl.textContent=ST.done?(ST.tok[0]?ST.tok[0].d:''):'';exprEl.style.fontSize='';exprEl.style.fontWeight='';setF('fSHIFT',ST.shift,'f-sft');setF('fALPHA',ST.alpha,'f-alp');setF('fM',ST.mem.M!==0);setF('fENG',ST.eng);setF('fANS',ST.done);setF('fSTO',ST.stoWait);setF('fRCL',ST.rclWait);const af=document.getElementById('fANG');af.textContent=ST.ang;af.className='flag on';const mf=document.getElementById('fMODE');if(mf){mf.textContent=ST.currentMode;mf.className='flag on';}document.getElementById('bsh').classList.toggle('sft-on',ST.shift);document.getElementById('bal').classList.toggle('alp-on',ST.alpha);}
+function setF(id,on,cls='on'){const el=document.getElementById(id);if(!el)return;el.className='flag'+(on?' '+cls:'');}
+function flashOK(){const d=document.getElementById('dsp');d.classList.add('ok');setTimeout(()=>d.classList.remove('ok'),220);}
+function flashErr(){const d=document.getElementById('dsp');d.classList.add('err');setTimeout(()=>d.classList.remove('err'),700);}
+function ripple(e){const r=document.createElement('span');r.className='rpleff';e.currentTarget.appendChild(r);setTimeout(()=>r.remove(),380);}
+function showHint(msg,ms=2200){const h=document.getElementById('hint');h.textContent=msg;h.classList.add('show');setTimeout(()=>h.classList.remove('show'),ms);}
+function doShift(e){ripple(e);if(ST.off)return;ST.shift=!ST.shift;if(ST.shift)ST.alpha=false;ST.stoWait=false;ST.rclWait=false;render();}
+function doAlpha(e){ripple(e);if(ST.off)return;ST.alpha=!ST.alpha;if(ST.alpha)ST.shift=false;ST.stoWait=false;ST.rclWait=false;render();}
+function clrModes(){ST.shift=false;ST.alpha=false;}
+
+// ═══════════════════════════════════════════════════
+//  MODE DEFINITIONS & OVERLAY
+// ═══════════════════════════════════════════════════
+const MODES=[
+  {id:1,name:'COMP',   short:'Standard Computation'},
+  {id:2,name:'CMPLX',  short:'Complex Numbers'},
+  {id:3,name:'STAT',   short:'Statistics & Regression'},
+  {id:4,name:'BASE-N', short:'Number Base Conversion'},
+  {id:5,name:'EQN',    short:'Equation Solver'},
+  {id:6,name:'MATRIX', short:'Matrix Calculations'},
+  {id:7,name:'VECTOR', short:'Vector Calculations'},
+  {id:8,name:'INEQ',   short:'Inequality Solver'},
+  {id:9,name:'RATIO',  short:'Proportion / Ratio'},
+  {id:0,name:'TABLE',  short:'Function Table Generator'},
+];
+
+function showModeMenu(){
+  ST.modeMenu=true;
+  const resEl=document.getElementById('dsp-res'),exprEl=document.getElementById('dsp-expr'),cur=document.getElementById('cur');
+  exprEl.style.fontSize='10px';exprEl.style.fontWeight='700';
+  exprEl.textContent='1:COMP  2:CMPLX  3:STAT  4:BASE-N  5:EQN';
+  resEl.className='dsp-res s3';resEl.textContent='6:MATRIX  7:VECTOR  8:INEQ  9:RATIO  0:TABLE';resEl.appendChild(cur);
+}
+function exitModeMenu(chosen){
+  ST.modeMenu=false;
+  const exprEl=document.getElementById('dsp-expr');exprEl.style.fontSize='';exprEl.style.fontWeight='';
+  if(chosen!==null&&chosen!==undefined){
+    const m=MODES.find(x=>String(x.id)===String(chosen));
+    if(m){
+      ST.currentMode=m.name;
+      if(m.name==='COMP'){acIn();}
+      else{showHint(m.name+': '+m.short,2000);openModeOverlay(m);}
+    }
+  }else{render();}
+}
+function openModeOverlay(m){
+  const ov=document.getElementById('mode-overlay');
+  document.getElementById('mo-title').textContent=m.name+' — '+m.short;
+  ov.classList.add('show');
+  const body=document.getElementById('mo-body');
+  switch(m.name){
+    case 'CMPLX':   renderCMPLX(body);break;
+    case 'STAT':    renderSTAT(body);break;
+    case 'BASE-N':  renderBASEN(body);break;
+    case 'EQN':     renderEQN(body);break;
+    case 'MATRIX':  renderMATRIX(body);break;
+    case 'VECTOR':  renderVECTOR(body);break;
+    case 'INEQ':    renderINEQ(body);break;
+    case 'RATIO':   renderRATIO(body);break;
+    case 'TABLE':   renderTABLE(body);break;
+    default:body.innerHTML='<p style="color:#6080a0;font-family:Share Tech Mono,monospace;font-size:10px;">Select a function above.</p>';
+  }
+  render();
+}
+function exitMode(){
+  document.getElementById('mode-overlay').classList.remove('show');
+  ST.currentMode='COMP';acIn();
+}
+
+// ── COMPLEX NUMBERS ──
+function renderCMPLX(b){
+  b.innerHTML=`
+  <div class="mo-sub"><div class="mo-sub-title">COMPLEX A = a + bi,  B = c + di</div>
+  <div class="mo-row"><span class="cmplx-lbl">A =</span><input class="mo-inp" id="ca" value="3" style="width:70px"> <span class="cmplx-pm">+</span><input class="mo-inp" id="cb" value="4" style="width:70px"><span class="cmplx-lbl" style="margin-left:4px;">i</span></div>
+  <div class="mo-row"><span class="cmplx-lbl">B =</span><input class="mo-inp" id="cc" value="1" style="width:70px"> <span class="cmplx-pm">+</span><input class="mo-inp" id="cd" value="2" style="width:70px"><span class="cmplx-lbl" style="margin-left:4px;">i</span></div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+    <button class="mo-btn" onclick="calcCmplx('add')">A+B</button>
+    <button class="mo-btn" onclick="calcCmplx('sub')">A−B</button>
+    <button class="mo-btn" onclick="calcCmplx('mul')">A×B</button>
+    <button class="mo-btn" onclick="calcCmplx('div')">A÷B</button>
+    <button class="mo-btn" onclick="calcCmplx('absA')">|A|</button>
+    <button class="mo-btn" onclick="calcCmplx('argA')">arg(A)</button>
+    <button class="mo-btn" onclick="calcCmplx('conjA')">conj(A)</button>
+    <button class="mo-btn" onclick="calcCmplx('powA2')">A²</button>
+  </div>
+  <div class="mo-result" id="cmplx-res">Result appears here</div>`;
+}
+function calcCmplx(op){
+  const a=parseFloat(document.getElementById('ca').value)||0;
+  const b=parseFloat(document.getElementById('cb').value)||0;
+  const c=parseFloat(document.getElementById('cc').value)||0;
+  const d=parseFloat(document.getElementById('cd').value)||0;
+  let re,im,txt;
+  switch(op){
+    case 'add':re=a+c;im=b+d;txt='A+B = '+fmtC(re,im);break;
+    case 'sub':re=a-c;im=b-d;txt='A−B = '+fmtC(re,im);break;
+    case 'mul':re=a*c-b*d;im=a*d+b*c;txt='A×B = '+fmtC(re,im);break;
+    case 'div':{const den=c*c+d*d;if(den===0){txt='Error: Division by zero';break;}re=(a*c+b*d)/den;im=(b*c-a*d)/den;txt='A÷B = '+fmtC(re,im);break;}
+    case 'absA':re=Math.sqrt(a*a+b*b);txt='|A| = '+fmt(re);break;
+    case 'argA':re=frR(Math.atan2(b,a));txt='arg(A) = '+fmt(re)+'°';break;
+    case 'conjA':txt='conj(A) = '+fmtC(a,-b);break;
+    case 'powA2':re=a*a-b*b;im=2*a*b;txt='A² = '+fmtC(re,im);break;
+  }
+  document.getElementById('cmplx-res').textContent=txt;
+}
+
+// ── STATISTICS ──
+let statData=[];
+function renderSTAT(b){
+  statData=[{x:'',y:''},{x:'',y:''},{x:'',y:''},{x:'',y:''},{x:'',y:''}];
+  b.innerHTML=`
+  <div class="mo-tabs">
+    <button class="mo-tab active" id="st1" onclick="statTab(1)">1-VAR</button>
+    <button class="mo-tab" id="st2" onclick="statTab(2)">2-VAR</button>
+  </div>
+  <div id="stat-content"></div>`;
+  statTab(1);
+}
+let statMode=1;
+function statTab(t){
+  statMode=t;
+  document.getElementById('st1').className='mo-tab'+(t===1?' active':'');
+  document.getElementById('st2').className='mo-tab'+(t===2?' active':'');
+  renderStatTable();
+}
+function renderStatTable(){
+  const rows=Math.max(8,statData.length+1);
+  while(statData.length<rows)statData.push({x:'',y:''});
+  let hdr=statMode===1?'<th>n</th><th>x</th>':'<th>n</th><th>x</th><th>y</th>';
+  let trs='';
+  for(let i=0;i<rows;i++){
+    trs+=`<tr><td style="color:#5070a0">${i+1}</td><td><input class="stat-table" style="width:60px;background:transparent;border:none;color:#c8d8e0;font-family:Share Tech Mono,monospace;font-size:11px;text-align:center;" oninput="statData[${i}].x=this.value" value="${statData[i].x||''}"></td>${statMode===2?`<td><input class="stat-table" style="width:60px;background:transparent;border:none;color:#c8d8e0;font-family:Share Tech Mono,monospace;font-size:11px;text-align:center;" oninput="statData[${i}].y=this.value" value="${statData[i].y||''}"></td>`:''}`;
+    trs+='</tr>';
+  }
+  document.getElementById('stat-content').innerHTML=`
+  <div style="overflow-y:auto;max-height:110px;margin-bottom:8px;"><table class="stat-table"><thead><tr>${hdr}</tr></thead><tbody>${trs}</tbody></table></div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;">
+    <button class="mo-btn" onclick="calcStat()">CALC</button>
+    <button class="mo-btn red" onclick="clearStatData()">CLEAR DATA</button>
+    ${statMode===2?'<select class="ineq-sel" id="regType" style="font-size:10px;"><option value="lin">y=a+bx</option><option value="quad">y=a+bx+cx²</option><option value="exp">y=ae^bx</option><option value="log">y=a+b·ln(x)</option><option value="pow">y=ax^b</option></select>':''}
+  </div>
+  <div class="mo-result" id="stat-res">Enter data then press CALC</div>`;
+}
+function clearStatData(){statData=Array(8).fill(null).map(()=>({x:'',y:''}));renderStatTable();}
+function calcStat(){
+  const xs=statData.map(r=>parseFloat(r.x)).filter(v=>!isNaN(v));
+  if(xs.length===0){document.getElementById('stat-res').textContent='No data entered';return;}
+  const n=xs.length,sx=xs.reduce((a,b)=>a+b,0),sx2=xs.reduce((a,b)=>a+b*b,0);
+  const mean=sx/n,varP=Math.max(0,sx2/n-mean*mean),sigmaP=Math.sqrt(varP),sigmaS=n>1?Math.sqrt(Math.max(0,sx2/(n-1)-sx*sx/(n*(n-1)))):NaN;
+  const sorted=[...xs].sort((a,b)=>a-b);
+  const med=n%2===0?(sorted[n/2-1]+sorted[n/2])/2:sorted[Math.floor(n/2)];
+  let res=`n = ${n}\nΣx = ${fmt(sx)}\nΣx² = ${fmt(sx2)}\nx̄ = ${fmt(mean)}\nσx = ${fmt(sigmaP)} (population)\nsx = ${fmt(n>1?sigmaS:NaN)} (sample)\nmin = ${fmt(sorted[0])}\nmax = ${fmt(sorted[n-1])}\nMedian = ${fmt(med)}`;
+  if(statMode===2){
+    const ys=statData.map(r=>parseFloat(r.y)).filter(v=>!isNaN(v));
+    if(ys.length>=2&&xs.length===ys.length){
+      const regEl=document.getElementById('regType');
+      const regType=regEl?regEl.value:'lin';
+      res+='\n\n'+calcRegression(xs,ys,regType);
+    }
+  }
+  document.getElementById('stat-res').textContent=res;
+}
+function calcRegression(xs,ys,type){
+  const n=xs.length;
+  let tx=xs,ty=ys;
+  if(type==='exp'){ty=ys.map(y=>Math.log(Math.abs(y)));} 
+  if(type==='log'){tx=xs.map(x=>Math.log(Math.abs(x)));}
+  if(type==='pow'){tx=xs.map(x=>Math.log(Math.abs(x)));ty=ys.map(y=>Math.log(Math.abs(y)));}
+  const sx=tx.reduce((a,b)=>a+b,0),sy=ty.reduce((a,b)=>a+b,0);
+  const sx2=tx.reduce((a,b)=>a+b*b,0),sxy=tx.reduce((s,x,i)=>s+x*ty[i],0);
+  const b=(n*sxy-sx*sy)/(n*sx2-sx*sx);
+  let a=(sy-b*sx)/n;
+  const rdenom=Math.sqrt((n*sx2-sx*sx)*(n*ty.reduce((s,y)=>s+y*y,0)-sy*sy));
+  const r=rdenom===0?NaN:(n*sxy-sx*sy)/rdenom;
+  let label,aL,bL;
+  if(type==='lin'){label='y = a + b·x';aL='a';bL='b';}
+  else if(type==='quad'){label='y = a + b·x + c·x²';// simple quadratic via normal equations
+    const sx3=xs.reduce((s,x)=>s+x**3,0),sx4=xs.reduce((s,x)=>s+x**4,0),sxy2=xs.reduce((s,x,i)=>s+x*x*ys[i],0);
+    // solve 3x3 system
+    const Aq=[[n,sx,sx2],[sx,sx2,sx3],[sx2,sx3,sx4]],Bq=[sy,xs.reduce((s,x,i)=>s+x*ys[i],0),sxy2];
+    const sol=solve3x3(Aq,Bq);if(sol){return`Quadratic Regression:\na = ${fmt(sol[0])}\nb = ${fmt(sol[1])}\nc = ${fmt(sol[2])}`;}return 'Quadratic regression failed';}
+  else if(type==='exp'){a=Math.exp(a);label='y = a·e^(b·x)';aL='a';bL='b';}
+  else if(type==='log'){label='y = a + b·ln(x)';aL='a';bL='b';}
+  else if(type==='pow'){a=Math.exp(a);label='y = a·x^b';aL='a';bL='b';}
+  return `Regression (${label}):\n${aL} = ${fmt(a)}\n${bL} = ${fmt(b)}\nr = ${fmt(r)}\nr² = ${fmt(r*r)}`;
+}
+
+// ── BASE-N ──
+let baseInput='0',baseCurrent='DEC';
+function renderBASEN(b){
+  b.innerHTML=`
+  <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;">
+    <button class="mo-btn" id="bb-dec" onclick="setBase('DEC')">DEC</button>
+    <button class="mo-btn" id="bb-hex" onclick="setBase('HEX')">HEX</button>
+    <button class="mo-btn" id="bb-oct" onclick="setBase('OCT')">OCT</button>
+    <button class="mo-btn" id="bb-bin" onclick="setBase('BIN')">BIN</button>
+  </div>
+  <div class="base-display" id="base-display"></div>
+  <div style="margin-bottom:8px;"><span class="mo-label">INPUT (${baseCurrent}): </span><input class="mo-inp" id="base-inp" value="${baseInput}" oninput="updateBase(this.value)" style="width:200px;text-align:left;"></div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;">
+    <button class="mo-btn" onclick="baseLogic('AND')">AND</button>
+    <button class="mo-btn" onclick="baseLogic('OR')">OR</button>
+    <button class="mo-btn" onclick="baseLogic('XOR')">XOR</button>
+    <button class="mo-btn" onclick="baseLogic('NOT')">NOT</button>
+  </div>
+  <div class="mo-result" id="base-logic-res" style="margin-top:8px;display:none;"></div>`;
+  setBase('DEC');
+}
+function setBase(base){
+  baseCurrent=base;
+  ['DEC','HEX','OCT','BIN'].forEach(b=>{
+    const el=document.getElementById('bb-'+b.toLowerCase());
+    if(el)el.style.background=base===b?'#1a4a8a':'#1a3a6e';
+  });
+  document.getElementById('base-inp').placeholder='Enter value in '+base;
+  updateBaseDisplay();
+}
+function updateBase(v){baseInput=v;updateBaseDisplay();}
+function updateBaseDisplay(){
+  const inp=document.getElementById('base-inp');if(!inp)return;
+  let dec;
+  try{
+    if(baseCurrent==='DEC')dec=parseInt(baseInput,10);
+    else if(baseCurrent==='HEX')dec=parseInt(baseInput,16);
+    else if(baseCurrent==='OCT')dec=parseInt(baseInput,8);
+    else dec=parseInt(baseInput,2);
+  }catch(e){dec=NaN;}
+  const disp=document.getElementById('base-display');
+  if(isNaN(dec)){disp.innerHTML='<span style="color:#d08888;font-family:Share Tech Mono,monospace;font-size:10px;">Invalid input</span>';return;}
+  const neg=dec<0,abs=Math.abs(dec);
+  disp.innerHTML=`
+  <div class="base-row"><span class="base-label">DEC</span><span class="base-val${baseCurrent==='DEC'?' active':''}">${dec}</span></div>
+  <div class="base-row"><span class="base-label">HEX</span><span class="base-val${baseCurrent==='HEX'?' active':''}">${(neg?'-':'')+(abs).toString(16).toUpperCase()}</span></div>
+  <div class="base-row"><span class="base-label">OCT</span><span class="base-val${baseCurrent==='OCT'?' active':''}">${(neg?'-':'')+(abs).toString(8)}</span></div>
+  <div class="base-row"><span class="base-label">BIN</span><span class="base-val${baseCurrent==='BIN'?' active':''}" style="font-size:10px;">${(neg?'-':'')+(abs).toString(2)}</span></div>`;
+}
+function baseLogic(op){
+  const v1Inp=document.getElementById('base-inp');
+  const v1=v1Inp?v1Inp.value:prompt('Enter value 1 ('+baseCurrent+'):');
+  if(v1===null||v1==='')return;
+  let res,dec1;
+  if(baseCurrent==='DEC')dec1=parseInt(v1,10);
+  else if(baseCurrent==='HEX')dec1=parseInt(v1,16);
+  else if(baseCurrent==='OCT')dec1=parseInt(v1,8);
+  else dec1=parseInt(v1,2);
+  if(isNaN(dec1)){document.getElementById('base-logic-res').style.display='block';document.getElementById('base-logic-res').textContent='Invalid input';return;}
+  if(op==='NOT'){res=(~dec1)>>>0;}
+  else{
+    const v2=prompt('Enter value 2 ('+baseCurrent+'):');if(v2===null)return;
+    let dec2;
+    if(baseCurrent==='DEC')dec2=parseInt(v2,10);
+    else if(baseCurrent==='HEX')dec2=parseInt(v2,16);
+    else if(baseCurrent==='OCT')dec2=parseInt(v2,8);
+    else dec2=parseInt(v2,2);
+    if(op==='AND')res=dec1&dec2;else if(op==='OR')res=dec1|dec2;else res=dec1^dec2;
+  }
+  const el=document.getElementById('base-logic-res');
+  el.style.display='block';
+  el.textContent=op+': DEC='+res+' HEX='+res.toString(16).toUpperCase()+' BIN='+res.toString(2);
+  baseInput=String(res);document.getElementById('base-inp').value=String(res);updateBaseDisplay();
+}
+
+// ── EQUATION SOLVER ──
+function renderEQN(b){
+  b.innerHTML=`
+  <div class="mo-tabs">
+    <button class="mo-tab active" id="eq-t1" onclick="eqnTab(1)">Simult 2</button>
+    <button class="mo-tab" id="eq-t2" onclick="eqnTab(2)">Simult 3</button>
+    <button class="mo-tab" id="eq-t3" onclick="eqnTab(3)">Quadratic</button>
+    <button class="mo-tab" id="eq-t4" onclick="eqnTab(4)">Cubic</button>
+  </div>
+  <div id="eqn-content"></div>`;
+  eqnTab(1);
+}
+function eqnTab(t){
+  [1,2,3,4].forEach(i=>document.getElementById('eq-t'+i).className='mo-tab'+(i===t?' active':''));
+  const c=document.getElementById('eqn-content');
+  if(t===1)c.innerHTML=`
+    <div class="mo-sub-title">a₁x + b₁y = c₁</div>
+    <div class="mo-row"><span class="mo-coef">a₁</span><input class="mo-inp" id="e1a" value="2"><span class="mo-coef">b₁</span><input class="mo-inp" id="e1b" value="3"><span class="mo-coef">c₁</span><input class="mo-inp" id="e1c" value="8"></div>
+    <div class="mo-row"><span class="mo-coef">a₂</span><input class="mo-inp" id="e2a" value="1"><span class="mo-coef">b₂</span><input class="mo-inp" id="e2b" value="-1"><span class="mo-coef">c₂</span><input class="mo-inp" id="e2c" value="1"></div>
+    <button class="mo-btn" onclick="solveSimult2()">SOLVE</button><div class="mo-result" id="eqn-res">—</div>`;
+  else if(t===2)c.innerHTML=`
+    <div class="mo-sub-title">ax + by + cz = d</div>
+    <div class="mo-row"><input class="mo-inp" id="s3a1" value="1" style="width:44px"><input class="mo-inp" id="s3b1" value="2" style="width:44px"><input class="mo-inp" id="s3c1" value="3" style="width:44px"><span class="mo-coef">=</span><input class="mo-inp" id="s3d1" value="6" style="width:44px"></div>
+    <div class="mo-row"><input class="mo-inp" id="s3a2" value="2"><input class="mo-inp" id="s3b2" value="-1"><input class="mo-inp" id="s3c2" value="1" style="width:44px"><span class="mo-coef">=</span><input class="mo-inp" id="s3d2" value="1" style="width:44px"></div>
+    <div class="mo-row"><input class="mo-inp" id="s3a3" value="1"><input class="mo-inp" id="s3b3" value="3"><input class="mo-inp" id="s3c3" value="-1" style="width:44px"><span class="mo-coef">=</span><input class="mo-inp" id="s3d3" value="2" style="width:44px"></div>
+    <button class="mo-btn" onclick="solveSimult3()">SOLVE</button><div class="mo-result" id="eqn-res">—</div>`;
+  else if(t===3)c.innerHTML=`
+    <div class="mo-sub-title">ax² + bx + c = 0</div>
+    <div class="mo-row"><span class="mo-coef">a</span><input class="mo-inp" id="qa" value="1"><span class="mo-coef">b</span><input class="mo-inp" id="qb" value="-5"><span class="mo-coef">c</span><input class="mo-inp" id="qc" value="6"></div>
+    <button class="mo-btn" onclick="solveQuad()">SOLVE</button><div class="mo-result" id="eqn-res">—</div>`;
+  else c.innerHTML=`
+    <div class="mo-sub-title">ax³ + bx² + cx + d = 0</div>
+    <div class="mo-row"><span class="mo-coef">a</span><input class="mo-inp" id="cba" value="1"><span class="mo-coef">b</span><input class="mo-inp" id="cbb" value="-6"><span class="mo-coef">c</span><input class="mo-inp" id="cbc" value="11"><span class="mo-coef">d</span><input class="mo-inp" id="cbd" value="-6"></div>
+    <button class="mo-btn" onclick="solveCubic()">SOLVE</button><div class="mo-result" id="eqn-res">—</div>`;
+}
+function solveSimult2(){
+  const a1=parseFloat(document.getElementById('e1a').value),b1=parseFloat(document.getElementById('e1b').value),c1=parseFloat(document.getElementById('e1c').value);
+  const a2=parseFloat(document.getElementById('e2a').value),b2=parseFloat(document.getElementById('e2b').value),c2=parseFloat(document.getElementById('e2c').value);
+  const det=a1*b2-a2*b1;
+  const el=document.getElementById('eqn-res');
+  if(Math.abs(det)<1e-12){el.textContent='No unique solution (det=0)';return;}
+  const x=(c1*b2-c2*b1)/det,y=(a1*c2-a2*c1)/det;
+  el.textContent=`x = ${fmt(x)}\ny = ${fmt(y)}`;
+}
+function solveSimult3(){
+  const A=[[parseFloat(document.getElementById('s3a1').value),parseFloat(document.getElementById('s3b1').value),parseFloat(document.getElementById('s3c1').value)],[parseFloat(document.getElementById('s3a2').value),parseFloat(document.getElementById('s3b2').value),parseFloat(document.getElementById('s3c2').value)],[parseFloat(document.getElementById('s3a3').value),parseFloat(document.getElementById('s3b3').value),parseFloat(document.getElementById('s3c3').value)]];
+  const B=[parseFloat(document.getElementById('s3d1').value),parseFloat(document.getElementById('s3d2').value),parseFloat(document.getElementById('s3d3').value)];
+  const sol=solve3x3(A,B);
+  document.getElementById('eqn-res').textContent=sol?`x = ${fmt(sol[0])}\ny = ${fmt(sol[1])}\nz = ${fmt(sol[2])}`:'No unique solution';
+}
+function solveQuad(){
+  const a=parseFloat(document.getElementById('qa').value),b=parseFloat(document.getElementById('qb').value),c=parseFloat(document.getElementById('qc').value);
+  if(a===0){document.getElementById('eqn-res').textContent='a must not be 0';return;}
+  const D=b*b-4*a*c;
+  const el=document.getElementById('eqn-res');
+  if(D>0){el.textContent=`x₁ = ${fmt((-b+Math.sqrt(D))/(2*a))}\nx₂ = ${fmt((-b-Math.sqrt(D))/(2*a))}`;}
+  else if(D===0){el.textContent=`x = ${fmt(-b/(2*a))} (double root)`;}
+  else{const re=-b/(2*a),im=Math.sqrt(-D)/(2*a);el.textContent=`x₁ = ${fmt(re)} + ${fmt(im)}i\nx₂ = ${fmt(re)} − ${fmt(im)}i`;}
+}
+function solveCubic(){
+  let a=parseFloat(document.getElementById('cba').value),b=parseFloat(document.getElementById('cbb').value),c=parseFloat(document.getElementById('cbc').value),d=parseFloat(document.getElementById('cbd').value);
+  if(a===0){document.getElementById('eqn-res').textContent='a must not be 0';return;}
+  // Numerical: Durand-Kerner
+  const roots=durKerner([a,b,c,d]);
+  const el=document.getElementById('eqn-res');
+  el.textContent=roots.map((r,i)=>{const re=r[0],im=r[1];return`x${i+1} = ${fmt(re)}${Math.abs(im)>1e-9?' '+(im>=0?'+':'−')+' '+fmt(Math.abs(im))+'i':''}`; }).join('\n');
+}
+// Durand-Kerner method for polynomial roots
+function durKerner(coeffs){
+  const n=coeffs.length-1;
+  const a=coeffs[0];
+  const monic=coeffs.map(c=>c/a);
+  let roots=[];
+  for(let i=0;i<n;i++){const angle=2*Math.PI*i/n+0.1;roots.push([0.4*Math.cos(angle),0.4*Math.sin(angle)]);}
+  for(let iter=0;iter<200;iter++){
+    for(let i=0;i<n;i++){
+      const pi=polyEvalC(monic,roots[i]);
+      let denom=[1,0];
+      for(let j=0;j<n;j++){if(j!==i){const diff=cSub(roots[i],roots[j]);denom=cMul(denom,diff);}}
+      const corr=cDiv(pi,denom);
+      roots[i]=cSub(roots[i],corr);
+    }
+  }
+  // clean tiny imaginary parts
+  return roots.map(r=>[Math.abs(r[0])<1e-8?0:parseFloat(r[0].toPrecision(8)),Math.abs(r[1])<1e-6?0:parseFloat(r[1].toPrecision(8))]);
+}
+function polyEvalC(coeffs,z){let res=[0,0];for(const c of coeffs)res=cAdd(cMul(res,z),[c,0]);return res;}
+function cAdd(a,b){return[a[0]+b[0],a[1]+b[1]];}
+function cSub(a,b){return[a[0]-b[0],a[1]-b[1]];}
+function cMul(a,b){return[a[0]*b[0]-a[1]*b[1],a[0]*b[1]+a[1]*b[0]];}
+function cDiv(a,b){const d=b[0]*b[0]+b[1]*b[1];if(d===0)return[0,0];return[(a[0]*b[0]+a[1]*b[1])/d,(a[1]*b[0]-a[0]*b[1])/d];}
+
+// ── MATRIX ──
+let matData={A:[[1,2],[3,4]],B:[[5,6],[7,8]],C:[[0,0],[0,0]]};
+let matSel='A',matSize=2;
+function renderMATRIX(b){
+  b.innerHTML=`
+  <div class="mo-tabs">
+    <button class="mo-tab active" id="mt-A" onclick="matSelect('A')">Matrix A</button>
+    <button class="mo-tab" id="mt-B" onclick="matSelect('B')">Matrix B</button>
+    <button class="mo-tab" id="mt-C" onclick="matSelect('C')">Matrix C</button>
+  </div>
+  <div class="mo-row"><span class="mo-coef">Size:</span>
+    <select class="ineq-sel" id="mat-size" onchange="matResize()"><option value="2">2×2</option><option value="3">3×3</option></select>
+  </div>
+  <div id="mat-grid-wrap" style="margin-bottom:8px;"></div>
+  <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+    <button class="mo-btn" onclick="matOp('A+B')">A+B</button>
+    <button class="mo-btn" onclick="matOp('A-B')">A−B</button>
+    <button class="mo-btn" onclick="matOp('AxB')">A×B</button>
+    <button class="mo-btn" onclick="matOp('BxA')">B×A</button>
+    <button class="mo-btn" onclick="matOp('detA')">det(A)</button>
+    <button class="mo-btn" onclick="matOp('invA')">A⁻¹</button>
+    <button class="mo-btn" onclick="matOp('transA')">Aᵀ</button>
+    <button class="mo-btn" onclick="matOp('scA')">k·A</button>
+  </div>
+  <div class="mo-result" id="mat-res" style="font-size:10px;">Result appears here</div>`;
+  matSelect('A');
+}
+function matSelect(m){
+  matSel=m;
+  ['A','B','C'].forEach(x=>document.getElementById('mt-'+x).className='mo-tab'+(x===m?' active':''));
+  renderMatGrid();
+}
+function matResize(){matSize=parseInt(document.getElementById('mat-size').value);['A','B','C'].forEach(k=>{if(!matData[k]||matData[k].length!==matSize)matData[k]=Array.from({length:matSize},()=>Array(matSize).fill(0));});renderMatGrid();}
+function renderMatGrid(){
+  const n=matSize;
+  if(!matData[matSel]||matData[matSel].length!==n)matData[matSel]=Array.from({length:n},()=>Array(n).fill(0));
+  const wrap=document.getElementById('mat-grid-wrap');
+  let html=`<div class="mat-grid" style="grid-template-columns:repeat(${n},1fr);">`;
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++)html+=`<input class="mat-inp" value="${matData[matSel][i][j]}" oninput="matData['${matSel}'][${i}][${j}]=parseFloat(this.value)||0">`;
+  html+='</div>';wrap.innerHTML=html;
+}
+function matOp(op){
+  // read current visible matrix inputs into matData[matSel]
+  const n=matSize;
+  const inputs=document.querySelectorAll('#mat-grid-wrap .mat-inp');
+  if(inputs.length===n*n){
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+      matData[matSel][i][j]=parseFloat(inputs[i*n+j].value)||0;
+    }
+  }
+  const A=matData.A,B=matData.B;
+  const el=document.getElementById('mat-res');
+  let R;
+  switch(op){
+    case 'A+B':R=matAdd(A,B);el.textContent=R?fmtMat(R):'Dimension mismatch';break;
+    case 'A-B':R=matSub(A,B);el.textContent=R?fmtMat(R):'Dimension mismatch';break;
+    case 'AxB':R=matMul(A,B);el.textContent=R?fmtMat(R):'Cannot multiply';break;
+    case 'BxA':R=matMul(B,A);el.textContent=R?fmtMat(R):'Cannot multiply';break;
+    case 'detA':el.textContent='det(A) = '+fmt(matDet(A));break;
+    case 'invA':R=matInv(A);el.textContent=R?fmtMat(R):'Singular matrix';break;
+    case 'transA':el.textContent=fmtMat(matTranspose(A));break;
+    case 'scA':{const k=parseFloat(prompt('Scalar k:'));if(!isNaN(k))el.textContent=fmtMat(A.map(r=>r.map(v=>v*k)));break;}
+  }
+}
+function matAdd(A,B){if(A.length!==B.length)return null;return A.map((r,i)=>r.map((v,j)=>v+B[i][j]));}
+function matSub(A,B){if(A.length!==B.length)return null;return A.map((r,i)=>r.map((v,j)=>v-B[i][j]));}
+function matMul(A,B){const n=A.length,m=B[0].length,p=B.length;if(A[0].length!==p)return null;return Array.from({length:n},(_,i)=>Array.from({length:m},(_,j)=>A[i].reduce((s,_,k)=>s+A[i][k]*B[k][j],0)));}
+function matDet(M){const n=M.length;if(n===1)return M[0][0];if(n===2)return M[0][0]*M[1][1]-M[0][1]*M[1][0];let d=0;for(let j=0;j<n;j++)d+=((j%2===0?1:-1)*M[0][j]*matDet(M.slice(1).map(r=>[...r.slice(0,j),...r.slice(j+1)])));return d;}
+function matInv(M){const n=M.length,det=matDet(M);if(Math.abs(det)<1e-12)return null;if(n===2){const[[a,b],[c,d]]=M;return[[(d/det),(-b/det)],[(-c/det),(a/det)]];}// Gaussian elimination for 3x3
+  const aug=M.map((r,i)=>[...r,...Array.from({length:n},(_,j)=>i===j?1:0)]);for(let c=0;c<n;c++){let maxR=c;for(let r=c+1;r<n;r++)if(Math.abs(aug[r][c])>Math.abs(aug[maxR][c]))maxR=r;[aug[c],aug[maxR]]=[aug[maxR],aug[c]];const piv=aug[c][c];if(Math.abs(piv)<1e-12)return null;for(let j=0;j<2*n;j++)aug[c][j]/=piv;for(let r=0;r<n;r++)if(r!==c){const f=aug[r][c];for(let j=0;j<2*n;j++)aug[r][j]-=f*aug[c][j];}}return aug.map(r=>r.slice(n));}
+function matTranspose(M){return M[0].map((_,j)=>M.map(r=>r[j]));}
+function fmtMat(M){return M.map(r=>'[ '+r.map(v=>fmt(v,6).padStart(10)).join('  ')+' ]').join('\n');}
+
+// ── VECTOR ──
+function renderVECTOR(b){
+  b.innerHTML=`
+  <div class="mo-tabs">
+    <button class="mo-tab active" id="vt2" onclick="vecDim(2)">2D</button>
+    <button class="mo-tab" id="vt3" onclick="vecDim(3)">3D</button>
+  </div>
+  <div id="vec-content"></div>`;
+  vecDim(2);
+}
+let vecD=2;
+function vecDim(d){
+  vecD=d;
+  document.getElementById('vt2').className='mo-tab'+(d===2?' active':'');
+  document.getElementById('vt3').className='mo-tab'+(d===3?' active':'');
+  const zRow=d===3?`<div class="mo-row"><span class="mo-coef" style="min-width:24px;">Az</span><input class="mo-inp vec-inp" id="vaz" value="0" style="width:60px"><span class="mo-coef" style="margin-left:8px;">Bz</span><input class="mo-inp vec-inp" id="vbz" value="0" style="width:60px"></div>`:'';
+  document.getElementById('vec-content').innerHTML=`
+  <div class="mo-row"><span class="mo-coef" style="min-width:24px;">Ax</span><input class="mo-inp vec-inp" id="vax" value="1" style="width:60px"><span class="mo-coef" style="margin-left:8px;">Bx</span><input class="mo-inp vec-inp" id="vbx" value="4" style="width:60px"></div>
+  <div class="mo-row"><span class="mo-coef" style="min-width:24px;">Ay</span><input class="mo-inp vec-inp" id="vay" value="2" style="width:60px"><span class="mo-coef" style="margin-left:8px;">By</span><input class="mo-inp vec-inp" id="vby" value="5" style="width:60px"></div>
+  ${zRow}
+  <div style="display:flex;flex-wrap:wrap;gap:4px;margin:8px 0;">
+    <button class="mo-btn" onclick="vecOp('add')">A+B</button>
+    <button class="mo-btn" onclick="vecOp('sub')">A−B</button>
+    <button class="mo-btn" onclick="vecOp('dot')">A·B</button>
+    ${d===3?'<button class="mo-btn" onclick="vecOp(\'cross\')">A×B</button>':''}
+    <button class="mo-btn" onclick="vecOp('magA')">|A|</button>
+    <button class="mo-btn" onclick="vecOp('magB')">|B|</button>
+    <button class="mo-btn" onclick="vecOp('angle')">Angle</button>
+    <button class="mo-btn" onclick="vecOp('unitA')">Â</button>
+  </div>
+  <div class="mo-result" id="vec-res">—</div>`;
+}
+function getVec(prefix){const x=parseFloat(document.getElementById(prefix+'x').value)||0,y=parseFloat(document.getElementById(prefix+'y').value)||0,z=vecD===3?(parseFloat(document.getElementById(prefix+'z').value)||0):undefined;return vecD===3?[x,y,z]:[x,y];}
+function vecOp(op){
+  const A=getVec('va'),B=getVec('vb');
+  const el=document.getElementById('vec-res');
+  const mag=v=>Math.sqrt(v.reduce((s,x)=>s+x*x,0));
+  switch(op){
+    case 'add':el.textContent='A+B = ('+A.map((v,i)=>fmt(v+B[i])).join(', ')+')';break;
+    case 'sub':el.textContent='A−B = ('+A.map((v,i)=>fmt(v-B[i])).join(', ')+')';break;
+    case 'dot':el.textContent='A·B = '+fmt(A.reduce((s,v,i)=>s+v*B[i],0));break;
+    case 'cross':{if(vecD!==3)break;const cx=A[1]*B[2]-A[2]*B[1],cy=A[2]*B[0]-A[0]*B[2],cz=A[0]*B[1]-A[1]*B[0];el.textContent='A×B = ('+fmt(cx)+', '+fmt(cy)+', '+fmt(cz)+')';break;}
+    case 'magA':el.textContent='|A| = '+fmt(mag(A));break;
+    case 'magB':el.textContent='|B| = '+fmt(mag(B));break;
+    case 'angle':{const dot=A.reduce((s,v,i)=>s+v*B[i],0),mA=mag(A),mB=mag(B);if(mA===0||mB===0){el.textContent='Cannot compute (zero vector)';break;}el.textContent='Angle = '+fmt(frR(Math.acos(dot/(mA*mB))))+'°';break;}
+    case 'unitA':{const m=mag(A);if(m===0){el.textContent='Zero vector';break;}el.textContent='Â = ('+A.map(v=>fmt(v/m)).join(', ')+')';break;}
+  }
+}
+
+// ── INEQUALITY ──
+function renderINEQ(b){
+  b.innerHTML=`
+  <div class="mo-tabs">
+    <button class="mo-tab active" id="iq1" onclick="ineqTab(1)">Linear</button>
+    <button class="mo-tab" id="iq2" onclick="ineqTab(2)">Quadratic</button>
+  </div>
+  <div id="ineq-content"></div>`;
+  ineqTab(1);
+}
+function ineqTab(t){
+  document.getElementById('iq1').className='mo-tab'+(t===1?' active':'');
+  document.getElementById('iq2').className='mo-tab'+(t===2?' active':'');
+  const c=document.getElementById('ineq-content');
+  if(t===1)c.innerHTML=`
+    <div class="mo-sub-title">ax + b &gt; 0 (select inequality)</div>
+    <div class="ineq-row"><span class="mo-coef">a</span><input class="mo-inp" id="lia" value="2" style="width:60px"><span class="mo-coef">b</span><input class="mo-inp" id="lib" value="-6" style="width:60px">
+    <select class="ineq-sel" id="li-op"><option>&gt;</option><option>≥</option><option>&lt;</option><option>≤</option></select></div>
+    <button class="mo-btn" onclick="solveLinIneq()">SOLVE</button><div class="mo-result" id="ineq-res">—</div>`;
+  else c.innerHTML=`
+    <div class="mo-sub-title">ax² + bx + c &gt; 0</div>
+    <div class="ineq-row"><span class="mo-coef">a</span><input class="mo-inp" id="qia" value="1" style="width:50px"><span class="mo-coef">b</span><input class="mo-inp" id="qib" value="-5" style="width:50px"><span class="mo-coef">c</span><input class="mo-inp" id="qic" value="6" style="width:50px">
+    <select class="ineq-sel" id="qi-op"><option>&gt;</option><option>≥</option><option>&lt;</option><option>≤</option></select></div>
+    <button class="mo-btn" onclick="solveQuadIneq()">SOLVE</button><div class="mo-result" id="ineq-res">—</div>`;
+}
+function solveLinIneq(){
+  const a=parseFloat(document.getElementById('lia').value),b=parseFloat(document.getElementById('lib').value);
+  const op=document.getElementById('li-op').value;
+  if(a===0){document.getElementById('ineq-res').textContent=b>0?'All real numbers':'No solution';return;}
+  const x=-b/a;
+  let res;
+  const flip=(a<0);
+  if(op==='>')res=flip?`x < ${fmt(x)}`:`x > ${fmt(x)}`;
+  else if(op==='≥')res=flip?`x ≤ ${fmt(x)}`:`x ≥ ${fmt(x)}`;
+  else if(op==='<')res=flip?`x > ${fmt(x)}`:`x < ${fmt(x)}`;
+  else res=flip?`x ≥ ${fmt(x)}`:`x ≤ ${fmt(x)}`;
+  document.getElementById('ineq-res').textContent=res;
+}
+function solveQuadIneq(){
+  const a=parseFloat(document.getElementById('qia').value),b=parseFloat(document.getElementById('qib').value),c=parseFloat(document.getElementById('qic').value);
+  const op=document.getElementById('qi-op').value;
+  const D=b*b-4*a*c;
+  const el=document.getElementById('ineq-res');
+  const gt=(op==='>'||op==='≥'),gte=(op==='≥'||op==='≤');
+  if(D<0){el.textContent=(a>0&&gt)||(a<0&&!gt)?'All real numbers':'No solution';return;}
+  if(D===0){const r=-b/(2*a);el.textContent=gte?`x ≠ ${fmt(r)} (all except double root)`:`x = ${fmt(r)}`;return;}
+  const x1=(-b-Math.sqrt(D))/(2*a),x2=(-b+Math.sqrt(D))/(2*a);
+  const lo=Math.min(x1,x2),hi=Math.max(x1,x2);
+  const lbr=gte?'[':'(',rbr=gte?']':')';
+  if(a>0){el.textContent=gt?`x < ${fmt(lo)} or x > ${fmt(hi)}`:`${lbr}${fmt(lo)}, ${fmt(hi)}${rbr}`;}
+  else{el.textContent=gt?`${lbr}${fmt(lo)}, ${fmt(hi)}${rbr}`:`x < ${fmt(lo)} or x > ${fmt(hi)}`;}
+}
+
+// ── RATIO ──
+function renderRATIO(b){
+  b.innerHTML=`
+  <div class="mo-sub-title">A : B = C : D — enter 3 known values, leave unknown as X</div>
+  <div class="mo-row"><span class="mo-coef">A</span><input class="mo-inp" id="ra" value="3"><span class="mo-coef" style="margin:0 5px;">:</span><span class="mo-coef">B</span><input class="mo-inp" id="rb" value="4"></div>
+  <div class="mo-row"><span class="mo-coef">C</span><input class="mo-inp" id="rc" value="6"><span class="mo-coef" style="margin:0 5px;">=</span><span class="mo-coef">D</span><input class="mo-inp" id="rd" value="X"></div>
+  <button class="mo-btn" onclick="solveRatio()" style="margin-top:4px;">SOLVE</button>
+  <div class="mo-result" id="ratio-res" style="margin-top:8px;">—</div>
+  <div style="margin-top:10px;border-top:1px solid #2a2e3a;padding-top:10px;">
+    <div class="mo-sub-title">PROPORTION CHECK: A/B = C/D ?</div>
+    <button class="mo-btn" onclick="checkProp()">CHECK</button>
+  </div>`;
+}
+function solveRatio(){
+  const raw={a:document.getElementById('ra').value,b:document.getElementById('rb').value,c:document.getElementById('rc').value,d:document.getElementById('rd').value};
+  const unknownKey=Object.keys(raw).find(k=>raw[k].trim().toUpperCase()==='X');
+  if(!unknownKey){document.getElementById('ratio-res').textContent='Please enter X for the unknown';return;}
+  const vals={};Object.keys(raw).forEach(k=>{if(k!==unknownKey)vals[k]=parseFloat(raw[k]);});
+  let ans;
+  const{a,b,c,d}=vals;
+  if(unknownKey==='a'){if(d===0){document.getElementById('ratio-res').textContent='Error: D cannot be zero';return;}ans=b*c/d;}
+  else if(unknownKey==='b'){if(c===0){document.getElementById('ratio-res').textContent='Error: C cannot be zero';return;}ans=a*d/c;}
+  else if(unknownKey==='c'){if(b===0){document.getElementById('ratio-res').textContent='Error: B cannot be zero';return;}ans=a*d/b;}
+  else{if(a===0){document.getElementById('ratio-res').textContent='Error: A cannot be zero';return;}ans=b*c/a;}
+  document.getElementById('ratio-res').textContent=`${unknownKey.toUpperCase()} = ${fmt(ans)}\n\nFull proportion: ${unknownKey==='a'?fmt(ans):raw.a} : ${unknownKey==='b'?fmt(ans):raw.b} = ${unknownKey==='c'?fmt(ans):raw.c} : ${unknownKey==='d'?fmt(ans):raw.d}`;
+}
+function checkProp(){
+  const a=parseFloat(document.getElementById('ra').value),b=parseFloat(document.getElementById('rb').value),c=parseFloat(document.getElementById('rc').value),d=parseFloat(document.getElementById('rd').value);
+  if(b===0||d===0){document.getElementById('ratio-res').textContent='Error: denominator cannot be zero';return;}
+  const lhs=a/b,rhs=c/d;
+  document.getElementById('ratio-res').textContent=`A/B = ${fmt(lhs)}\nC/D = ${fmt(rhs)}\n${Math.abs(lhs-rhs)<1e-10?'✓ Proportion holds':'✗ Not proportional (diff: '+fmt(lhs-rhs)+')'}`;
+}
+
+// ── TABLE ──
+function renderTABLE(b){
+  b.innerHTML=`
+  <div class="mo-label">f(x) expression (use x):</div>
+  <input class="mo-inp" id="tbl-fn" value="x^2" style="text-align:left;margin-bottom:8px;">
+  <div class="mo-row"><span class="mo-coef">Start</span><input class="mo-inp" id="tbl-s" value="-5" style="width:60px"><span class="mo-coef">End</span><input class="mo-inp" id="tbl-e" value="5" style="width:60px"><span class="mo-coef">Step</span><input class="mo-inp" id="tbl-st" value="1" style="width:60px"></div>
+  <button class="mo-btn" onclick="genTable()">GENERATE</button>
+  <div class="tbl-output" id="tbl-out"></div>`;
+}
+function genTable(){
+  const fnStr=document.getElementById('tbl-fn').value;
+  const start=parseFloat(document.getElementById('tbl-s').value);
+  const end=parseFloat(document.getElementById('tbl-e').value);
+  const step=parseFloat(document.getElementById('tbl-st').value);
+  if(isNaN(start)||isNaN(end)||isNaN(step)||step<=0||start>end){document.getElementById('tbl-out').innerHTML='<p style="color:#d08888;font-family:Share Tech Mono,monospace;font-size:10px;padding:8px;">Invalid parameters</p>';return;}
+  const cx=buildCtx();
+  const rows=[];
+  for(let x=start;x<=end+1e-10;x+=step){
+    try{
+      const fn=new Function(...Object.keys(cx),'x','"use strict";return ('+fnStr.replace(/\^/g,'**')+');');
+      const y=fn(...Object.values(cx),x);
+      rows.push([fmt(x,6),isNaN(y)||!isFinite(y)?'Error':fmt(y,8)]);
+    }catch(e){rows.push([fmt(x,6),'Error']);}
+    if(rows.length>200)break;
+  }
+  document.getElementById('tbl-out').innerHTML=`<table><thead><tr><th>x</th><th>f(x)</th></tr></thead><tbody>${rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('')}</tbody></table>`;
+}
+
+// ── Helper: solve 3x3 linear system ──
+function solve3x3(A,B){
+  const M=A.map((r,i)=>[...r,B[i]]);
+  for(let c=0;c<3;c++){
+    let maxR=c;for(let r=c+1;r<3;r++)if(Math.abs(M[r][c])>Math.abs(M[maxR][c]))maxR=r;
+    [M[c],M[maxR]]=[M[maxR],M[c]];
+    const piv=M[c][c];if(Math.abs(piv)<1e-12)return null;
+    for(let j=c;j<=3;j++)M[c][j]/=piv;
+    for(let r=0;r<3;r++)if(r!==c){const f=M[r][c];for(let j=c;j<=3;j++)M[r][j]-=f*M[c][j];}
+  }
+  return M.map(r=>r[3]);
+}
+
+// ═══════════════════════════════════════════════════
+//  MAIN BUTTON HANDLER
+// ═══════════════════════════════════════════════════
+function btn(e,primary,shifted){
+  ripple(e);
+  if(ST.off){if(primary==='ac'&&shifted==='off'){clrModes();dispatch('off');}return;}
+  let a=primary;
+  if(ST.modeMenu){
+    const mk2={'n1':'1','n2':'2','n3':'3','n4':'4','n5':'5','n6':'6','n7':'7','n8':'8','n9':'9','n0':'0'};
+    exitModeMenu(mk2[primary]!==undefined?mk2[primary]:null);return;
+  }
+  if(ST.stoWait||ST.rclWait){
+    const vm={'n0':'M','n1':'A','n2':'B','n3':'C','n4':'D','n5':'E','n6':'F'};
+    const k=vm[primary];
+    if(k!==undefined){
+      if(ST.stoWait){const v=ST.done?ST.ans:safeEval(gE());if(isFinite(v)&&!isNaN(v)){ST.mem[k]=v;flashOK();showHint('Stored → '+k+'='+fmt(v));}else flashErr();}
+      else{const varMap={M:'mM',A:'mA',B:'mB',C:'mC',D:'mD',E:'mE',F:'mF'};afterDone();implMul();ST.tok.push(mk(varMap[k],k,'k'));showHint('Recalled '+k+'='+fmt(ST.mem[k]));}
+      ST.stoWait=false;ST.rclWait=false;clrModes();render();return;
+    }
+    ST.stoWait=false;ST.rclWait=false;
+  }
+  if(ST.shift&&shifted)a=shifted;
+  clrModes();dispatch(a);render();
+}
+
+function dispatch(a){
+  const dm=a.match(/^n(\d)$/);if(dm){pushNum(dm[1]);return;}
+  switch(a){
+    case 'ac':{if(ST.modeMenu){exitModeMenu(null);break;}acIn();break;}
+    case 'off':{ST.off=!ST.off;if(ST.off){const d=document.getElementById('dsp');d.style.background='#8a9470';document.getElementById('dsp-res').textContent='';document.getElementById('dsp-expr').textContent='';document.querySelectorAll('.flag').forEach(f=>f.className='flag');document.getElementById('cur').style.display='none';}else{document.getElementById('dsp').style.background='';document.getElementById('cur').style.display='';ST.tok=[];ST.result='0';ST.openP=0;ST.done=false;ST.modeMenu=false;render();}return;}
+    case 'del':{if(ST.modeMenu){exitModeMenu(null);return;}doDelete();return;}
+    case 'clr':acIn();break;
+    case 'eq':{if(ST.modeMenu){exitModeMenu(null);return;}calculate();return;}
+    case 'mode':{ST.modeMenu=true;showModeMenu();return;}
+    case 'drg':{const ms=['DEG','RAD','GRAD'];ST.ang=ms[(ms.indexOf(ST.ang)+1)%3];showHint('Angle: '+ST.ang,1800);break;}
+    case 'eng':ST.eng=!ST.eng;if(ST.done)ST.result=fmt(ST.ans);break;
+    case 'dot':pushDot();return;
+    case 'add':pushOp('+','+');return;case 'sub':pushOp('-','−');return;
+    case 'mul':pushOp('*','×');return;case 'div':pushOp('/','÷');return;
+    case 'oparen':pushOpen();return;case 'cparen':pushClose();return;
+    case 'sin':pushFn('SIN(','sin(');return;case 'asin':pushFn('ASIN(','sin⁻¹(');return;
+    case 'cos':pushFn('COS(','cos(');return;case 'acos':pushFn('ACOS(','cos⁻¹(');return;
+    case 'tan':pushFn('TAN(','tan(');return;case 'atan':pushFn('ATAN(','tan⁻¹(');return;
+    case 'sinh':pushFn('SINH(','sinh(');return;case 'asinh':pushFn('ASINH(','sinh⁻¹(');return;
+    case 'cosh':pushFn('COSH(','cosh(');return;case 'acosh':pushFn('ACOSH(','cosh⁻¹(');return;
+    case 'tanh':pushFn('TANH(','tanh(');return;case 'atanh':pushFn('ATANH(','tanh⁻¹(');return;
+    case 'log':pushFn('LOG(','log(');return;case 'pow10':pushFn('POW10(','10^(');return;
+    case 'ln':pushFn('LN(','ln(');return;case 'expe':pushFn('EXP(','eˣ(');return;
+    case 'sqrt':pushFn('SQRT(','√(');return;case 'cbrt':pushFn('CBRT(','∛(');return;
+    case 'absfn':pushFn('ABS(','|');return;case 'intfn':pushFn('INT(','Int(');return;
+    case 'fracfn':pushFn('FRAC(','Frac(');return;case 'floorfn':pushFn('FLOOR(','⌊(');return;
+    case 'ceilfn':pushFn('CEIL(','⌈(');return;case 'rndfn':pushFn('RND(','Rnd(');return;
+    case 'ncr':pushFn('NCR(','nCr(');return;case 'npr':pushFn('NPR(','nPr(');return;
+    case 'gcdfn':pushFn('GCD(','GCD(');return;case 'lcmfn':pushFn('LCM(','LCM(');return;
+    case 'logbase':pushFn('LOGB(','logB(');return;case 'modfn':pushFn('MOD(','mod(');return;
+    case 'nthrtfn':pushFn('NTHRT(','ⁿ√(');return;
+    case 'sq':pushPostfix('**2','²');return;case 'cube':pushPostfix('**3','³');return;
+    case 'recip':pushPostfix('**(-1)','⁻¹');return;case 'fact':pushFact();return;
+    case 'pct':case 'pctkey':pushPostfix('/100','%');return;
+    case 'pow':pushOp('**','^');return;case 'yroot':pushYroot();return;
+    case 'neg':pushNeg();return;
+    case 'exp10':pushOp('*POW10(','×10^(');ST.openP++;return;
+    case 'pi':pushConst('PI','π');return;case 'euler':pushConst('EU','e');return;
+    case 'ans':pushConst('ANS','Ans');return;
+    case 'ran':pushConst(String(Math.random()),'Ran#');return;
+    case 'ranint':{const lo=prompt('RanInt lower:'),hi=prompt('RanInt upper:');if(lo!==null&&hi!==null){const lv=parseInt(lo),hv=parseInt(hi);if(!isNaN(lv)&&!isNaN(hv)&&hv>=lv){const rv=lv+Math.floor(Math.random()*(hv-lv+1));pushConst(String(rv),String(rv));}}return;}
+    case 'mplus':{const v=ST.done?ST.ans:safeEval(gE());if(isFinite(v)&&!isNaN(v)){ST.mem.M+=v;showHint('M = '+fmt(ST.mem.M));flashOK();}}break;
+    case 'mminus':{const v=ST.done?ST.ans:safeEval(gE());if(isFinite(v)&&!isNaN(v)){ST.mem.M-=v;showHint('M = '+fmt(ST.mem.M));flashOK();}}break;
+    case 'mc':ST.mem.M=0;showHint('M cleared');flashOK();break;
+    case 'sto':ST.stoWait=true;showHint('STO → 0=M, 1=A…6=F',3000);break;
+    case 'rcl':ST.rclWait=true;showHint('RCL → 0=M, 1=A…6=F',3000);break;
+    case 'dms':doDMS();break;case 'hmsfn':doHMS();break;
+    case 'polfn':doPol();break;case 'recfn':doRec();break;
+  }
+}
+function doDMS(){if(!ST.done)return;const dd=ST.ans,d=Math.trunc(dd),mf=(Math.abs(dd)-Math.abs(d))*60,m=Math.trunc(mf),s=parseFloat(((mf-m)*60).toFixed(6));ST.result=d+'°'+m+"'"+s+'"';render();}
+function doHMS(){if(!ST.done)return;const x=ST.ans,d=Math.trunc(x),frac=Math.abs(x-d),m=Math.trunc(frac*100),s=(frac*100-m)*100,dec=d+m/60+s/3600;ST.ans=dec;ST.result=fmt(dec);ST.tok=[mk(String(dec),fmt(dec),'k')];render();}
+function doPol(){const xs=prompt('Pol(x,y) x:'),ys=prompt('Pol(x,y) y:');if(!xs||!ys)return;const x=parseFloat(xs),y=parseFloat(ys);if(isNaN(x)||isNaN(y)){flashErr();return;}const r=Math.sqrt(x*x+y*y),th=frR(Math.atan2(y,x));ST.ans=r;ST.result='r='+fmt(r)+'  θ='+fmt(th);ST.tok=[mk(String(r),'Pol('+xs+','+ys+')','k')];ST.done=true;flashOK();render();}
+function doRec(){const rs=prompt('Rec(r,θ) r:'),ts=prompt('Rec(r,θ) θ:');if(!rs||!ts)return;const r=parseFloat(rs),t=parseFloat(ts);if(isNaN(r)||isNaN(t)){flashErr();return;}const x=r*Math.cos(toR(t)),y=r*Math.sin(toR(t));ST.ans=x;ST.result='x='+fmt(x)+'  y='+fmt(y);ST.tok=[mk(String(x),'Rec('+rs+','+ts+')','k')];ST.done=true;flashOK();render();}
+
+// ── Keyboard ──
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.altKey||e.metaKey)return;
+  if(ST.off){if(e.key==='Escape')dispatch('off');return;}
+  if(ST.modeMenu){exitModeMenu(null);return;}
+  const k=e.key;
+  if(k>='0'&&k<='9'){e.preventDefault();pushNum(k);return;}
+  if(k==='.'){e.preventDefault();pushDot();return;}
+  if(k==='+'){e.preventDefault();pushOp('+','+');return;}
+  if(k==='-'){e.preventDefault();pushOp('-','−');return;}
+  if(k==='*'){e.preventDefault();pushOp('*','×');return;}
+  if(k==='/'){e.preventDefault();pushOp('/','÷');return;}
+  if(k==='('){e.preventDefault();pushOpen();return;}
+  if(k===')'){e.preventDefault();pushClose();return;}
+  if(k==='^'){e.preventDefault();pushOp('**','^');return;}
+  if(k==='%'){e.preventDefault();pushPostfix('/100','%');return;}
+  if(k==='Enter'||k==='='){e.preventDefault();calculate();return;}
+  if(k==='Backspace'){e.preventDefault();doDelete();return;}
+  if(k==='Escape'){e.preventDefault();acIn();return;}
+  const sh={s:'sin',c:'cos',t:'tan',l:'log',n:'ln',q:'sqrt',p:'pi',a:'ans'};
+  if(sh[k]){clrModes();dispatch(sh[k]);}
+});
+
+// ═══════════════════════════════════════════════════
+//  GOOGLE APPS SCRIPT INTEGRATION
+// ═══════════════════════════════════════════════════
+function gasLog(){if(!ST.done||ST.result==='Math Error')return;const rec={expression:ST.tok[0]?ST.tok[0].d:'',result:ST.result,timestamp:new Date().toISOString()};try{google.script.run.withSuccessHandler(()=>{if(document.getElementById('gas-panel').style.display!=='none')refreshHistory();}).withFailureHandler(()=>{}).logCalculation(rec);}catch(err){}}
+function toggleGasPanel(e){const p=document.getElementById('gas-panel'),btn=e.target;if(!p.style.display||p.style.display==='none'){p.style.display='block';btn.textContent='HISTORY ▴';refreshHistory();}else{p.style.display='none';btn.textContent='HISTORY ▾';}}
+function refreshHistory(){const list=document.getElementById('gas-list');if(!list)return;list.innerHTML='<div style="padding:10px;text-align:center;font-family:Share Tech Mono,monospace;font-size:9px;color:#3a4455;">Loading…</div>';try{google.script.run.withSuccessHandler(function(rows){if(!rows||rows.length===0){list.innerHTML='<div style="padding:12px;text-align:center;font-family:Share Tech Mono,monospace;font-size:9px;color:#3a4455;">No history yet</div>';return;}list.innerHTML=rows.map(function(r){const ts=r.timestamp?new Date(r.timestamp).toLocaleTimeString():'';return'<div class="gas-row" onclick="recallHist(\''+esc(String(r.result))+'\')"><span class="gas-expr">'+esc(String(r.expression))+'</span><span class="gas-result">'+esc(String(r.result))+'</span><span class="gas-time">'+ts+'</span></div>';}).join('');}).withFailureHandler(()=>{ list.innerHTML='<div style="padding:10px;text-align:center;font-family:Share Tech Mono,monospace;font-size:9px;color:#d08888;">Load failed</div>';}).getHistory(30);}catch(e){list.innerHTML='<div style="padding:10px;text-align:center;font-family:Share Tech Mono,monospace;font-size:9px;color:#3a4455;">Not available offline</div>';}}
+function recallHist(val){const n=parseFloat(val);if(!isNaN(n)){ST.tok=[];ST.openP=0;ST.done=false;pushConst(String(n),val);render();}}
+function doClearHistory(){if(!confirm('Clear all history?'))return;try{google.script.run.withSuccessHandler(()=>refreshHistory()).withFailureHandler(e=>alert('Error: '+e.message)).clearHistory();}catch(e){}}
+function doExportCSV(){try{google.script.run.withSuccessHandler(function(csv){if(!csv){alert('No history.');return;}const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='calc_history_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(u);}).withFailureHandler(e=>alert('Export failed: '+e.message)).exportHistoryCSV();}catch(e){}}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+window.addEventListener('load',function(){try{document.getElementById('gas-user').textContent='<?= userEmail ?>';}catch(e){}setTimeout(()=>{ try{google.script.run.withSuccessHandler(rows=>{if(rows&&rows.length>0){const l=document.getElementById('gas-list');l.innerHTML=rows.slice(0,3).map(r=>'<div class="gas-row"><span class="gas-expr">'+esc(String(r.expression))+'</span><span class="gas-result">'+esc(String(r.result))+'</span></div>').join('');}}).getHistory(3);}catch(e){}},2000);});
+
+// ── Init ──
+const sol=document.getElementById('solar');
+for(let i=0;i<20;i++){const s=document.createElement('div');s.className='sc2';sol.appendChild(s);}
+render();
+</script>
+</body>
+</html>
